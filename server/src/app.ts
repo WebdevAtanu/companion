@@ -5,6 +5,8 @@ import morgan from "morgan";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import userRoutes from "./modules/user/user.routes";
+import authRoutes from "./modules/companion/auth.routes";
+import companionRoutes from "./modules/companion/companion.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express(); // create express app
@@ -42,6 +44,8 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api/users", userRoutes); // mount user routes
+app.use("/api/auth", authRoutes);
+app.use("/api", companionRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
