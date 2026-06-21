@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-// Generic API Response
+// Generic API Response structure 
 interface ApiResponse<T> {
   success: boolean;
   message: string;

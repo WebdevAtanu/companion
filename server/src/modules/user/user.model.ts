@@ -5,4 +5,4 @@ export interface IUser {
   password: string;
 }
 
-export const UserTable = "users";
+export const UserTable = "users"; // Table name in database

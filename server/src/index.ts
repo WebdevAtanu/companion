@@ -5,18 +5,19 @@ const PORT = process.env.PORT || 5000;
 
 async function startServer() {
   try {
+    // Check if database configuration is provided
     const hasDbConfig = Boolean(
       process.env.DB_HOST &&
-        process.env.DB_USER &&
-        process.env.DB_PASSWORD &&
-        process.env.DB_NAME,
+      process.env.DB_USER &&
+      process.env.DB_PASSWORD &&
+      process.env.DB_NAME,
     );
 
     if (hasDbConfig) {
-      await db.raw("SELECT 1");
+      await db.raw("SELECT 1"); // Test database connection
       console.log("Database connected successfully");
     } else {
-      console.log("Database config missing; starting with in-memory APIs");
+      console.log("Database config missing");
     }
 
     const server = app.listen(PORT, () => {

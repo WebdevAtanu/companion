@@ -38,7 +38,7 @@ app.use("/api", limiter); // apply rate limiter to /api routes
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "success",
-    message: "Server is running 🚀",
+    message: "Server is running",
   });
 });
 
