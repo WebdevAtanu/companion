@@ -4,37 +4,25 @@ import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
-import userRoutes from "./modules/user/user.routes";
-import authRoutes from "./modules/companion/auth.routes";
-import companionRoutes from "./modules/companion/companion.routes";
+import authRoutes from "./modules/auth/auth.routes";
+import companionRoutes from "./modules/companion";
 import { errorHandler } from "./middleware/error.middleware";
 
-const app = express(); // create express app
+const app = express();
 
-app.use(helmet()); // enable security headers
+app.use(helmet());
+app.use(cors({ origin: "*", credentials: true }));
+app.use(express.json());
+app.use(compression());
+app.use(morgan("dev"));
 
-// Enable CORS
-app.use(
-  cors({
-    origin: "*", // allow all origins
-    credentials: true, // allow credentials
-  }),
-);
-
-app.use(express.json()); // parse JSON request body
-
-app.use(compression()); // compress response
-app.use(morgan("dev")); // log requests
-
-// Rate limiting (prevent brute force / DOS)
 const limiter = rateLimit({
-  max: 100, // max requests
-  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 100,
+  windowMs: 15 * 60 * 1000,
   message: "Too many requests from this IP, please try again later",
 });
-app.use("/api", limiter); // apply rate limiter to /api routes
+app.use("/api", limiter);
 
-// Health check
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "success",
@@ -42,19 +30,16 @@ app.get("/", (req, res) => {
   });
 });
 
-// API routes
-app.use("/api/users", userRoutes); // mount user routes
 app.use("/api/auth", authRoutes);
 app.use("/api", companionRoutes);
 
-// 404 handler
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
-    status: "fail",
+    success: false,
     message: `Route ${req.originalUrl} not found`,
   });
 });
 
-app.use(errorHandler); // global error handler
+app.use(errorHandler);
 
 export default app;

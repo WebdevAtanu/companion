@@ -1,14 +1,11 @@
 import { Response } from "express";
 
-// Generic API Response structure 
 interface ApiResponse<T> {
   success: boolean;
   message: string;
   data?: T;
-  error?: any;
 }
 
-// Success Response
 export const successResponse = <T>(
   res: Response,
   message: string,
@@ -18,16 +15,12 @@ export const successResponse = <T>(
   const response: ApiResponse<T> = {
     success: true,
     message,
+    ...(data !== undefined && { data }),
   };
-
-  if (data !== undefined) {
-    response.data = data;
-  }
 
   return res.status(statusCode).json(response);
 };
 
-// Error Response
 export const errorResponse = (
   res: Response,
   message: string,
@@ -37,7 +30,7 @@ export const errorResponse = (
   const response: ApiResponse<null> = {
     success: false,
     message,
-    error,
+    ...(error && { error }),
   };
 
   return res.status(statusCode).json(response);

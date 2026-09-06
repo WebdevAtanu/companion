@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { errorResponse } from "../../utils/responseHelper";
-import { store } from "./companion.store";
+import db from "../config/db";
+import { errorResponse } from "../utils/responseHelper";
 
 const jwtSecret = process.env.JWT_SECRET || "mental-companion-dev-secret";
 
@@ -12,27 +12,32 @@ export interface AuthenticatedRequest extends Request {
 
 // Generate JWT token
 export const signToken = (userId: string) =>
-  jwt.sign({ sub: userId }, jwtSecret, { expiresIn: "7d" }); // Token expires in 7 days
+  jwt.sign({ sub: userId }, jwtSecret, { expiresIn: "7d" });
 
 // Middleware to authenticate requests
-export const authenticate = (
+export const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const header = req.headers.authorization; // Get authorization header
+  const header = req.headers.authorization;
 
-  // Check if authorization header is present
   if (!header?.startsWith("Bearer ")) {
     return errorResponse(res, "Authorization token is required", null, 401);
   }
 
   try {
-    const token = header.slice("Bearer ".length); // Extract token from header
-    const payload = jwt.verify(token, jwtSecret); // Verify token
-    const userId = typeof payload === "string" ? undefined : payload.sub; // Get user ID from payload
+    const token = header.slice("Bearer ".length);
+    const payload = jwt.verify(token, jwtSecret);
+    const userId = typeof payload === "string" ? undefined : payload.sub;
 
-    if (typeof userId !== "string" || !store.users.has(userId)) {
+    if (typeof userId !== "string") {
+      return errorResponse(res, "Invalid authorization token", null, 401);
+    }
+
+    // Check if user exists in database
+    const user = await db("users").where({ id: userId }).first();
+    if (!user) {
       return errorResponse(res, "Invalid authorization token", null, 401);
     }
 

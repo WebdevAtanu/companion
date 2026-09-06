@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { errorResponse, successResponse } from "../../utils/responseHelper";
-import { AuthenticatedRequest } from "./auth.middleware";
+import { AuthenticatedRequest } from "../../middleware/auth.middleware";
 import * as authService from "./auth.service";
 
 const registerSchema = z.object({
@@ -37,9 +37,9 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const me = (req: Request, res: Response) => {
+export const me = async (req: Request, res: Response) => {
   try {
-    const user = authService.getMe((req as AuthenticatedRequest).userId);
+    const user = await authService.getMe((req as AuthenticatedRequest).userId);
 
     return successResponse(res, "User profile fetched", user);
   } catch (error: unknown) {
